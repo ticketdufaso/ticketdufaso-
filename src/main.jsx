@@ -1,170 +1,100 @@
 /**
- * Point d'entrée principal - FASO TICKET
- * Règles NASA 1-10
- * Sécurité niveau Google/Windows
- * CORRECTIONS :
- * - Désactivation COMPLÈTE de tous les console.* en production
- * - Protection renforcée contre l'inspection
- * - Gestion des erreurs silencieuse
- * - CORRECTION : Import dynamique pour html2canvas
- * - CORRECTION : Gestion des erreurs de chargement
+ * Script d'obfuscation - Niveau NASA
+ * Règles NASA 1, 4, 5, 6
  */
-import './polyfills.js'
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App'
-import { ThemeProvider } from './context/ThemeContext'
-import './index.css'
 
-// ============================================================
-// POLYFILL : Gestion de html2canvas pour Netlify
-// ============================================================
+import JavaScriptObfuscator from 'javascript-obfuscator'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-// S'assurer que l'environnement est prêt pour html2canvas
-if (typeof window !== 'undefined') {
-  // Si html2canvas n'est pas défini, on le définit comme un objet vide
-  // pour éviter les erreurs de référence
-  if (!window.html2canvas) {
-    window.html2canvas = {}
-  }
-  
-  // S'assurer que les APIs nécessaires existent
-  if (!window.HTMLCanvasElement) {
-    window.HTMLCanvasElement = class HTMLCanvasElement {}
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const OBFUSCATION_CONFIG = {
+  compact: true,
+  controlFlowFlattening: true,
+  controlFlowFlatteningThreshold: 1,
+  deadCodeInjection: true,
+  deadCodeInjectionThreshold: 0.4,
+  debugProtection: true,
+  debugProtectionInterval: 2000,
+  disableConsoleOutput: true,
+  identifierNamesGenerator: 'hexadecimal',
+  log: false,
+  numbersToExpressions: true,
+  renameGlobals: true,
+  selfDefending: true,
+  simplify: true,
+  splitStrings: true,
+  splitStringsChunkLength: 10,
+  stringArray: true,
+  stringArrayCallsTransform: true,
+  stringArrayCallsTransformThreshold: 0.5,
+  stringArrayEncoding: ['rc4'],
+  stringArrayIndexShift: true,
+  stringArrayWrappersCount: 2,
+  stringArrayWrappersChainedCalls: true,
+  stringArrayWrappersParametersMaxCount: 4,
+  stringArrayWrappersType: 'function',
+  stringArrayThreshold: 0.75,
+  transformObjectKeys: true,
+  unicodeEscapeSequence: false
+}
+
+const ALLOWED_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs']
+const EXCLUDED_PATTERNS = ['vendor', 'polyfill', 'chunk-vendors', 'runtime']
+
+const obfuscateFile = (filePath) => {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8')
+    const result = JavaScriptObfuscator.obfuscate(content, OBFUSCATION_CONFIG)
+    fs.writeFileSync(filePath, result.getObfuscatedCode(), 'utf8')
+    console.log(`✅ Obfusqué: ${path.basename(filePath)}`)
+  } catch (error) {
+    console.error(`❌ Erreur sur ${filePath}:`, error.message)
   }
 }
 
-// ============================================================
-// SÉCURITÉ : DÉSACTIVER TOUS LES LOGS EN PRODUCTION
-// ============================================================
+const obfuscateDirectory = (directory) => {
+  if (!fs.existsSync(directory)) {
+    console.log(`⚠️ Dossier non trouvé: ${directory}`)
+    return
+  }
 
-if (import.meta.env.PROD) {
-  // Fonction vide pour désactiver les logs
-  const noop = () => {}
+  const files = fs.readdirSync(directory)
   
-  // Désactiver TOUS les console.*
-  console.log = noop
-  console.debug = noop
-  console.info = noop
-  console.warn = noop
-  console.error = noop
-  console.trace = noop
-  console.group = noop
-  console.groupEnd = noop
-  console.groupCollapsed = noop
-  console.time = noop
-  console.timeEnd = noop
-  console.timeLog = noop
-  console.count = noop
-  console.countReset = noop
-  console.table = noop
-  console.dir = noop
-  console.dirxml = noop
-  console.assert = noop
-  console.clear = noop
-  console.profile = noop
-  console.profileEnd = noop
-  
-  // Désactiver les logs de performance
-  if (window.performance) {
-    window.performance.mark = noop
-    window.performance.measure = noop
-    window.performance.clearMarks = noop
-    window.performance.clearMeasures = noop
-  }
-  
-  // Désactiver l'API PerformanceObserver
-  if (window.PerformanceObserver) {
-    try {
-      window.PerformanceObserver = noop
-    } catch {
-      // Ignorer les erreurs
-    }
-  }
-  
-  // Désactiver React DevTools
-  if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
-    try {
-      window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject = noop
-      window.__REACT_DEVTOOLS_GLOBAL_HOOK__.on = noop
-      window.__REACT_DEVTOOLS_GLOBAL_HOOK__.off = noop
-      window.__REACT_DEVTOOLS_GLOBAL_HOOK__.emit = noop
-    } catch {
-      // Ignorer les erreurs
-    }
-  }
-  
-  // Désactiver les logs de Supabase
-  if (window.__SUPABASE__) {
-    try {
-      window.__SUPABASE__.log = noop
-    } catch {
-      // Ignorer les erreurs
+  for (const file of files) {
+    const fullPath = path.join(directory, file)
+    const stat = fs.statSync(fullPath)
+    
+    if (stat.isDirectory()) {
+      obfuscateDirectory(fullPath)
+    } else {
+      const ext = path.extname(file)
+      const isAllowed = ALLOWED_EXTENSIONS.includes(ext)
+      const isExcluded = EXCLUDED_PATTERNS.some(p => file.includes(p))
+      
+      if (isAllowed && !isExcluded) {
+        obfuscateFile(fullPath)
+      }
     }
   }
 }
 
-// ============================================================
-// SÉCURITÉ : PROTECTION CONTRE L'INSPECTION
-// ============================================================
-
-if (import.meta.env.PROD) {
-  // Bloquer le clic droit
-  document.addEventListener('contextmenu', (e) => {
-    e.preventDefault()
-    return false
-  })
-
-  // Bloquer les raccourcis d'inspection
-  document.addEventListener('keydown', (e) => {
-    if (
-      e.key === 'F12' ||
-      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-      (e.ctrlKey && e.key === 'U') ||
-      (e.ctrlKey && e.key === 'C' && !e.target.closest('input, textarea, [contenteditable]'))
-    ) {
-      e.preventDefault()
-      return false
-    }
-  })
-
-  // Bloquer la sélection de texte (sauf dans les champs de formulaire)
-  document.addEventListener('selectstart', (e) => {
-    if (!e.target.closest('input, textarea, [contenteditable]')) {
-      e.preventDefault()
-      return false
-    }
-  })
-
-  // Désactiver le drag & drop
-  document.addEventListener('dragstart', (e) => {
-    if (!e.target.closest('input, textarea, [contenteditable]')) {
-      e.preventDefault()
-      return false
-    }
-  })
-
-  // Bloquer l'ouverture de la console
-  document.addEventListener('keyup', (e) => {
-    if (e.key === 'F12') {
-      e.preventDefault()
-      return false
-    }
-  })
+const main = () => {
+  console.log('🚀 Démarrage de l\'obfuscation...')
+  const distDir = path.join(__dirname, '../dist/assets')
+  
+  if (!fs.existsSync(distDir)) {
+    console.log('⚠️ Dossier dist/assets non trouvé. Build d\'abord ?')
+    process.exit(1)
+  }
+  
+  obfuscateDirectory(distDir)
+  console.log('🎯 Obfuscation terminée avec succès !')
 }
 
-// ============================================================
-// RENDU DE L'APPLICATION
-// ============================================================
+console.assert(process.env.NODE_ENV === 'production', 'L\'obfuscation ne doit être utilisée qu\'en production')
 
-const rootElement = document.getElementById('root')
-
-if (rootElement) {
-  ReactDOM.createRoot(rootElement).render(
-    <React.StrictMode>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
-    </React.StrictMode>
-  )
-}
+main()

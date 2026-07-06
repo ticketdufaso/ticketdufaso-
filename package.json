@@ -6,11 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:secure": "npm run clean:logs && vite build --mode production && node scripts/obfuscate.js",
-    "build:deploy": "node scripts/build-and-deploy.js",
+    "build:secure": "vite build --mode production && node scripts/obfuscate.js",
     "preview": "vite preview",
-    "clean:logs": "node scripts/clean-logs.js",
-    "restore:logs": "find src -name '*.clean-backup' -exec sh -c 'mv \"$1\" \"${1%.clean-backup}\"' _ {} \\;",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext js,jsx --fix",
     "format": "prettier --write .",

@@ -118,7 +118,6 @@ export default defineConfig(({ mode }) => {
             regex: /^_/
           }
         },
-        // ✅ CORRECTION : format au lieu de comments
         format: {
           comments: false,
           beautify: false,

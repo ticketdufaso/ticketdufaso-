@@ -64,3 +64,6 @@ ehthumbs.db
 
 # Vite
 .vite/
+
+# ✅ AJOUTÉ : Sauvegardes du script clean-logs
+*.clean-backup*.clean-backup 
