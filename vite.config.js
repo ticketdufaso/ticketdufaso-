@@ -7,54 +7,56 @@ export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production'
   const isNetlify = process.env.NETLIFY === 'true'
 
+  // ✅ Désactiver complètement PWA sur Netlify
+  const pwaPlugin = !isNetlify && VitePWA({
+    registerType: 'autoUpdate',
+    includeAssets: ['favicon.png', 'robots.txt', 'icons/*.png'],
+    manifest: {
+      name: 'FASO TICKET',
+      short_name: 'FASO TICKET',
+      description: 'Billetterie sécurisée pour événements au Burkina Faso',
+      theme_color: '#000000',
+      background_color: '#000000',
+      display: 'standalone',
+      orientation: 'portrait',
+      start_url: '/',
+      scope: '/',
+      icons: [
+        { src: '/icons/icon-72x72.png', sizes: '72x72', type: 'image/png' },
+        { src: '/icons/icon-96x96.png', sizes: '96x96', type: 'image/png' },
+        { src: '/icons/icon-128x128.png', sizes: '128x128', type: 'image/png' },
+        { src: '/icons/icon-144x144.png', sizes: '144x144', type: 'image/png' },
+        { src: '/icons/icon-152x152.png', sizes: '152x152', type: 'image/png' },
+        { src: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/icons/icon-384x384.png', sizes: '384x384', type: 'image/png' },
+        { src: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+      ]
+    },
+    workbox: {
+      globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+          handler: 'NetworkOnly',
+          options: {
+            cacheName: 'supabase-cache',
+            expiration: {
+              maxEntries: 10,
+              maxAgeSeconds: 60
+            }
+          }
+        }
+      ]
+    }
+  })
+
   return {
     plugins: [
       react({
         jsxRuntime: 'automatic',
         devTarget: 'es2020'
       }),
-      // ✅ Désactiver PWA sur Netlify pour éviter l'erreur workbox-build
-      !isNetlify && VitePWA({
-        registerType: 'autoUpdate',
-        includeAssets: ['favicon.png', 'robots.txt', 'icons/*.png'],
-        manifest: {
-          name: 'FASO TICKET',
-          short_name: 'FASO TICKET',
-          description: 'Billetterie sécurisée pour événements au Burkina Faso',
-          theme_color: '#000000',
-          background_color: '#000000',
-          display: 'standalone',
-          orientation: 'portrait',
-          start_url: '/',
-          scope: '/',
-          icons: [
-            { src: '/icons/icon-72x72.png', sizes: '72x72', type: 'image/png' },
-            { src: '/icons/icon-96x96.png', sizes: '96x96', type: 'image/png' },
-            { src: '/icons/icon-128x128.png', sizes: '128x128', type: 'image/png' },
-            { src: '/icons/icon-144x144.png', sizes: '144x144', type: 'image/png' },
-            { src: '/icons/icon-152x152.png', sizes: '152x152', type: 'image/png' },
-            { src: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-            { src: '/icons/icon-384x384.png', sizes: '384x384', type: 'image/png' },
-            { src: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
-          ]
-        },
-        workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-          runtimeCaching: [
-            {
-              urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-              handler: 'NetworkOnly',
-              options: {
-                cacheName: 'supabase-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60
-                }
-              }
-            }
-          ]
-        }
-      })
+      pwaPlugin
     ].filter(Boolean),
     resolve: {
       alias: {
