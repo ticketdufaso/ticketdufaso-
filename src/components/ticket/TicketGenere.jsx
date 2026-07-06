@@ -1,13 +1,13 @@
 /**
  * Ticket Généré - Version horizontale avec affiche en fond
  * Règles NASA 1-10
- * SÉCURITÉ : Import dynamique de html2canvas avec fallback
  */
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { QRCodeSVG } from 'qrcode.react';
+import html2canvas from 'html2canvas';
 import { 
   Download, Home, Ticket, Calendar, MapPin, User, Phone, 
   CreditCard, Loader, CheckCircle, AlertCircle, Crown, 
@@ -76,10 +76,6 @@ const TicketGenere = () => {
     }
   };
 
-  // ============================================================
-  // TÉLÉCHARGEMENT AVEC IMPORT DYNAMIQUE SÉCURISÉ
-  // ============================================================
-
   const handleDownload = async (force = false) => {
     if (estTelecharge && !force) {
       setError('⚠️ Ce ticket a déjà été téléchargé.');
@@ -103,35 +99,14 @@ const TicketGenere = () => {
     setError('');
 
     try {
-      // ✅ IMPORT DYNAMIQUE SÉCURISÉ avec fallback
-      let html2canvas;
-      try {
-        const module = await import('html2canvas');
-        html2canvas = module.default || module;
-      } catch (importError) {
-        setError('❌ Erreur de chargement. Veuillez réessayer.');
-        setDownloading(false);
-        return;
-      }
-
-      if (!html2canvas || typeof html2canvas !== 'function') {
-        setError('❌ Bibliothèque de téléchargement indisponible.');
-        setDownloading(false);
-        return;
-      }
-
       if (!force) {
-        try {
-          await supabase
-            .from('ventes')
-            .update({
-              est_telecharger: true,
-              date_telechargement: new Date().toISOString()
-            })
-            .eq('id', id);
-        } catch {
-          // Ignorer les erreurs de mise à jour
-        }
+        await supabase
+          .from('ventes')
+          .update({
+            est_telecharger: true,
+            date_telechargement: new Date().toISOString()
+          })
+          .eq('id', id);
         setEstTelecharge(true);
       }
 
@@ -143,16 +118,7 @@ const TicketGenere = () => {
         allowTaint: true,
         useClone: true,
         width: 850,
-        height: 530,
-        onclone: (document) => {
-          const elements = document.querySelectorAll('.ticket-text');
-          elements.forEach(el => {
-            el.style.height = 'auto';
-            el.style.lineHeight = '1.6';
-            el.style.overflow = 'visible';
-            el.style.paddingBottom = '6px';
-          });
-        }
+        height: 530
       });
       
       const link = document.createElement('a');
@@ -176,10 +142,6 @@ const TicketGenere = () => {
   const handleForceDownload = async () => {
     await handleDownload(true);
   };
-
-  // ============================================================
-  // CHARGEMENT DES DONNÉES
-  // ============================================================
 
   useEffect(() => {
     const fetchTicketData = async () => {
@@ -417,25 +379,13 @@ const TicketGenere = () => {
             <div className="flex flex-1 gap-3 min-h-0">
               
               <div className="w-3/5 flex flex-col bg-black/40 backdrop-blur-sm rounded-xl p-3 border border-white/10">
-                <h2 
-                  className="text-white font-bold text-sm md:text-base lg:text-lg ticket-text"
-                  style={{ 
-                    lineHeight: '1.5',
-                    height: 'auto',
-                    overflow: 'visible',
-                    paddingBottom: '2px',
-                    wordBreak: 'break-word'
-                  }}
-                >
+                <h2 className="text-white font-bold text-sm md:text-base lg:text-lg">
                   {evenement?.nom || 'Événement'}
                 </h2>
                 
                 <div className="space-y-1 mt-1 text-gray-200 text-xs md:text-sm">
                   {evenement?.date && (
-                    <div 
-                      className="flex items-center gap-1.5 ticket-text"
-                      style={{ lineHeight: '1.5', height: 'auto', overflow: 'visible' }}
-                    >
+                    <div className="flex items-center gap-1.5">
                       <span className="text-yellow-400 text-sm">📅</span>
                       <span className="text-white font-medium text-xs md:text-sm">
                         {formatDate(evenement.date)} à {formatTime(evenement.date)}
@@ -443,10 +393,7 @@ const TicketGenere = () => {
                     </div>
                   )}
                   {evenement?.lieu && (
-                    <div 
-                      className="flex items-center gap-1.5 ticket-text"
-                      style={{ lineHeight: '1.5', height: 'auto', overflow: 'visible' }}
-                    >
+                    <div className="flex items-center gap-1.5">
                       <MapPin className="h-3.5 w-3.5 text-yellow-400 flex-shrink-0" />
                       <span className="text-white font-medium text-xs md:text-sm">
                         {evenement.lieu}
@@ -454,10 +401,7 @@ const TicketGenere = () => {
                     </div>
                   )}
                   {evenement?.infos_lieu && (
-                    <div 
-                      className="text-yellow-400 text-[10px] md:text-xs font-medium mt-0.5 ticket-text"
-                      style={{ lineHeight: '1.4', height: 'auto', overflow: 'visible', paddingBottom: '2px' }}
-                    >
+                    <div className="text-yellow-400 text-[10px] md:text-xs font-medium mt-0.5">
                       ℹ️ {evenement.infos_lieu}
                     </div>
                   )}
@@ -468,10 +412,7 @@ const TicketGenere = () => {
                     <p className="text-yellow-400 text-[8px] flex items-center gap-1">
                       <CreditCard className="h-2.5 w-2.5" /> QR CODE
                     </p>
-                    <p 
-                      className="text-white/60 text-[8px] font-mono ticket-text"
-                      style={{ lineHeight: '1.4', height: 'auto', overflow: 'visible', wordBreak: 'break-all' }}
-                    >
+                    <p className="text-white/60 text-[8px] font-mono break-all">
                       {id}
                     </p>
                   </div>
@@ -510,10 +451,7 @@ const TicketGenere = () => {
                     {ticketData?.client_nom && (
                       <div className="col-span-2">
                         <p className="text-yellow-400 text-[8px]">ACHETEUR</p>
-                        <p 
-                          className="text-white text-xs font-medium ticket-text"
-                          style={{ lineHeight: '1.5', height: 'auto', overflow: 'visible', wordBreak: 'break-word' }}
-                        >
+                        <p className="text-white text-xs font-medium break-words">
                           {ticketData.client_nom}
                         </p>
                       </div>
@@ -521,10 +459,7 @@ const TicketGenere = () => {
                     {ticketData?.client_whatsapp && (
                       <div>
                         <p className="text-yellow-400 text-[8px]">WHATSAPP</p>
-                        <p 
-                          className="text-gray-300 text-[10px] ticket-text"
-                          style={{ lineHeight: '1.4', height: 'auto', overflow: 'visible' }}
-                        >
+                        <p className="text-gray-300 text-[10px]">
                           {ticketData.client_whatsapp}
                         </p>
                       </div>
@@ -532,10 +467,7 @@ const TicketGenere = () => {
                     {ticketData?.montant && (
                       <div className="text-right">
                         <p className="text-yellow-400 text-[8px]">MONTANT</p>
-                        <p 
-                          className="text-yellow-400 font-bold text-xs ticket-text"
-                          style={{ lineHeight: '1.4', height: 'auto', overflow: 'visible' }}
-                        >
+                        <p className="text-yellow-400 font-bold text-xs">
                           {ticketData.montant.toLocaleString()} FCFA
                         </p>
                       </div>
@@ -543,10 +475,7 @@ const TicketGenere = () => {
                     {ticketData?.created_at && (
                       <div className="col-span-2">
                         <p className="text-yellow-400 text-[8px]">DATE D'ACHAT</p>
-                        <p 
-                          className="text-gray-300 text-[10px] ticket-text"
-                          style={{ lineHeight: '1.4', height: 'auto', overflow: 'visible' }}
-                        >
+                        <p className="text-gray-300 text-[10px]">
                           {formatDateTime(ticketData.created_at)}
                         </p>
                       </div>

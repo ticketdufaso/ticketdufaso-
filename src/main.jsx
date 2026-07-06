@@ -11,19 +11,6 @@ import { ThemeProvider } from './context/ThemeContext'
 import './index.css'
 
 // ============================================================
-// POLYFILL : Gestion de html2canvas pour Netlify
-// ============================================================
-
-if (typeof window !== 'undefined') {
-  if (!window.html2canvas) {
-    window.html2canvas = {}
-  }
-  if (!window.HTMLCanvasElement) {
-    window.HTMLCanvasElement = class HTMLCanvasElement {}
-  }
-}
-
-// ============================================================
 // SÉCURITÉ : DÉSACTIVER TOUS LES LOGS EN PRODUCTION
 // ============================================================
 
