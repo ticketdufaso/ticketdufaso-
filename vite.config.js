@@ -5,6 +5,7 @@ import path from 'path'
 
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production'
+  const isNetlify = process.env.NETLIFY === 'true'
 
   return {
     plugins: [
@@ -12,7 +13,8 @@ export default defineConfig(({ mode }) => {
         jsxRuntime: 'automatic',
         devTarget: 'es2020'
       }),
-      VitePWA({
+      // ✅ Désactiver PWA sur Netlify pour éviter l'erreur workbox-build
+      !isNetlify && VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['favicon.png', 'robots.txt', 'icons/*.png'],
         manifest: {
@@ -53,7 +55,7 @@ export default defineConfig(({ mode }) => {
           ]
         }
       })
-    ],
+    ].filter(Boolean),
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
