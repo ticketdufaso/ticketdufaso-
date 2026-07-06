@@ -1,7 +1,7 @@
 /**
  * Script de nettoyage des console.log dans le code source
  * Règles NASA 1, 4, 5, 6
- * À exécuter avant le build de production
+ * CORRECTION : Supprime correctement les console.log sans casser la syntaxe
  */
 
 import fs from 'fs'
@@ -15,29 +15,29 @@ const SRC_DIR = path.join(__dirname, '../src')
 const EXCLUDED_DIRS = ['node_modules', 'dist', '.git', '.vite', '.husky']
 const ALLOWED_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx']
 
-// Pattern pour détecter les console.log (et autres)
+// ✅ CORRECTION : Patterns avec capture pour supprimer correctement
 const CONSOLE_PATTERNS = [
-  /console\.log\(/g,
-  /console\.debug\(/g,
-  /console\.info\(/g,
-  /console\.warn\(/g,
-  /console\.error\(/g,
-  /console\.trace\(/g,
-  /console\.group\(/g,
-  /console\.groupEnd\(/g,
-  /console\.groupCollapsed\(/g,
-  /console\.time\(/g,
-  /console\.timeEnd\(/g,
-  /console\.timeLog\(/g,
-  /console\.count\(/g,
-  /console\.countReset\(/g,
-  /console\.table\(/g,
-  /console\.dir\(/g,
-  /console\.dirxml\(/g,
-  /console\.assert\(/g,
-  /console\.clear\(/g,
-  /console\.profile\(/g,
-  /console\.profileEnd\(/g
+  /console\.log\([^;]*\);?/g,
+  /console\.debug\([^;]*\);?/g,
+  /console\.info\([^;]*\);?/g,
+  /console\.warn\([^;]*\);?/g,
+  /console\.error\([^;]*\);?/g,
+  /console\.trace\([^;]*\);?/g,
+  /console\.group\([^;]*\);?/g,
+  /console\.groupEnd\([^;]*\);?/g,
+  /console\.groupCollapsed\([^;]*\);?/g,
+  /console\.time\([^;]*\);?/g,
+  /console\.timeEnd\([^;]*\);?/g,
+  /console\.timeLog\([^;]*\);?/g,
+  /console\.count\([^;]*\);?/g,
+  /console\.countReset\([^;]*\);?/g,
+  /console\.table\([^;]*\);?/g,
+  /console\.dir\([^;]*\);?/g,
+  /console\.dirxml\([^;]*\);?/g,
+  /console\.assert\([^;]*\);?/g,
+  /console\.clear\([^;]*\);?/g,
+  /console\.profile\([^;]*\);?/g,
+  /console\.profileEnd\([^;]*\);?/g
 ]
 
 let stats = {
@@ -75,28 +75,24 @@ const processFile = (filePath) => {
     let removedCount = 0
     let hasChanges = false
     
-    // Compter les console.log présents
-    let totalMatches = 0
-    for (const pattern of CONSOLE_PATTERNS) {
-      const matches = content.match(pattern)
-      if (matches) {
-        totalMatches += matches.length
-      }
-    }
-    
-    if (totalMatches === 0) return
-    
     // Nettoyer le fichier
     for (const pattern of CONSOLE_PATTERNS) {
       const matches = modifiedContent.match(pattern)
       if (matches) {
         removedCount += matches.length
-        modifiedContent = modifiedContent.replace(pattern, '/* removed */ ')
+        // ✅ CORRECTION : Remplacer par une ligne vide ou un commentaire
+        modifiedContent = modifiedContent.replace(pattern, '')
         hasChanges = true
       }
     }
     
+    // ✅ CORRECTION : Nettoyer les lignes vides laissées par la suppression
     if (hasChanges) {
+      // Supprimer les lignes vides multiples
+      modifiedContent = modifiedContent.replace(/^\s*[\r\n]/gm, '')
+      // Supprimer les espaces en fin de ligne
+      modifiedContent = modifiedContent.replace(/[ \t]+$/gm, '')
+      
       // Sauvegarder l'original
       const backupPath = filePath + '.clean-backup'
       fs.writeFileSync(backupPath, content, 'utf8')

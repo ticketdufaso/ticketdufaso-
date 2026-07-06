@@ -7,13 +7,14 @@
  * - Toutes les informations visibles
  * - Téléchargement direct via l'URL (paramètre ?download=true)
  * - Détection du téléchargement automatique via WhatsApp
+ * - CORRECTION : Import dynamique de html2canvas pour Netlify
+ * - CORRECTION : Gestion des erreurs de chargement
  */
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { QRCodeSVG } from 'qrcode.react';
-import html2canvas from 'html2canvas';
 import { 
   Download, Home, Ticket, Calendar, MapPin, User, Phone, 
   CreditCard, Loader, CheckCircle, AlertCircle, Crown, 
@@ -41,6 +42,7 @@ const TicketGenere = () => {
   const [imageError, setImageError] = useState(false);
   const [autoDownloadTriggered, setAutoDownloadTriggered] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [html2canvasLoaded, setHtml2canvasLoaded] = useState(false);
 
   const getSiteUrl = () => {
     return window.location.origin;
@@ -85,7 +87,7 @@ const TicketGenere = () => {
   };
 
   // ============================================================
-  // TÉLÉCHARGEMENT AUTOMATIQUE
+  // TÉLÉCHARGEMENT AVEC IMPORT DYNAMIQUE DE html2canvas
   // ============================================================
 
   const handleDownload = async (force = false) => {
@@ -102,23 +104,49 @@ const TicketGenere = () => {
       return;
     }
 
-    if (!ticketRef.current) return;
+    if (!ticketRef.current) {
+      setError('❌ Référence du ticket non trouvée.');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
     
     setDownloading(true);
     setError('');
 
     try {
+      // ✅ CORRECTION : Import dynamique de html2canvas avec fallback
+      let html2canvas;
+      try {
+        const module = await import('html2canvas');
+        html2canvas = module.default || module;
+      } catch (importError) {
+        console.error('Erreur import html2canvas:', importError);
+        setError('❌ Erreur lors du chargement de la bibliothèque de téléchargement.');
+        setDownloading(false);
+        return;
+      }
+
+      if (!html2canvas || typeof html2canvas !== 'function') {
+        setError('❌ La bibliothèque de téléchargement n\'est pas disponible.');
+        setDownloading(false);
+        return;
+      }
+
       // Mettre à jour uniquement si ce n'est pas un admin/organisateur qui force
       if (!force) {
-        const { error: updateError } = await supabase
-          .from('ventes')
-          .update({
-            est_telecharger: true,
-            date_telechargement: new Date().toISOString()
-          })
-          .eq('id', id);
+        try {
+          const { error: updateError } = await supabase
+            .from('ventes')
+            .update({
+              est_telecharger: true,
+              date_telechargement: new Date().toISOString()
+            })
+            .eq('id', id);
 
-        if (updateError) {
+          if (updateError) {
+            console.error('Erreur mise à jour:', updateError);
+          }
+        } catch (updateError) {
           console.error('Erreur mise à jour:', updateError);
         }
         setEstTelecharge(true);
@@ -155,8 +183,8 @@ const TicketGenere = () => {
       setTimeout(() => setSuccess(''), 3000);
 
     } catch (error) {
-      console.error('Erreur:', error);
-      setError('Erreur lors du téléchargement');
+      console.error('Erreur téléchargement:', error);
+      setError('❌ Erreur lors du téléchargement: ' + (error.message || 'Veuillez réessayer'));
       setTimeout(() => setError(''), 3000);
     } finally {
       setDownloading(false);

@@ -6,13 +6,33 @@
  * - Désactivation COMPLÈTE de tous les console.* en production
  * - Protection renforcée contre l'inspection
  * - Gestion des erreurs silencieuse
+ * - CORRECTION : Import dynamique pour html2canvas
+ * - CORRECTION : Gestion des erreurs de chargement
  */
-
+import './polyfills.js'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import { ThemeProvider } from './context/ThemeContext'
 import './index.css'
+
+// ============================================================
+// POLYFILL : Gestion de html2canvas pour Netlify
+// ============================================================
+
+// S'assurer que l'environnement est prêt pour html2canvas
+if (typeof window !== 'undefined') {
+  // Si html2canvas n'est pas défini, on le définit comme un objet vide
+  // pour éviter les erreurs de référence
+  if (!window.html2canvas) {
+    window.html2canvas = {}
+  }
+  
+  // S'assurer que les APIs nécessaires existent
+  if (!window.HTMLCanvasElement) {
+    window.HTMLCanvasElement = class HTMLCanvasElement {}
+  }
+}
 
 // ============================================================
 // SÉCURITÉ : DÉSACTIVER TOUS LES LOGS EN PRODUCTION

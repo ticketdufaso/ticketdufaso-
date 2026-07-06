@@ -75,7 +75,29 @@ export default defineConfig(({ mode }) => {
         compress: {
           drop_console: true,
           drop_debugger: true,
-          pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.trace', 'console.warn'],
+          pure_funcs: [
+            'console.log',
+            'console.info',
+            'console.debug',
+            'console.trace',
+            'console.warn',
+            'console.error',
+            'console.assert',
+            'console.group',
+            'console.groupEnd',
+            'console.groupCollapsed',
+            'console.time',
+            'console.timeEnd',
+            'console.timeLog',
+            'console.count',
+            'console.countReset',
+            'console.table',
+            'console.dir',
+            'console.dirxml',
+            'console.clear',
+            'console.profile',
+            'console.profileEnd'
+          ],
           passes: 3,
           unsafe: true,
           unsafe_comps: true,
@@ -96,6 +118,7 @@ export default defineConfig(({ mode }) => {
             regex: /^_/
           }
         },
+        // ✅ CORRECTION : format au lieu de comments
         format: {
           comments: false,
           beautify: false,
@@ -114,7 +137,8 @@ export default defineConfig(({ mode }) => {
           manualChunks: {
             vendor: ['react', 'react-dom', 'react-router-dom'],
             supabase: ['@supabase/supabase-js'],
-            ui: ['lucide-react', 'react-hot-toast', 'framer-motion']
+            ui: ['lucide-react', 'react-hot-toast', 'framer-motion'],
+            canvas: ['html2canvas', 'jspdf']
           }
         }
       },
