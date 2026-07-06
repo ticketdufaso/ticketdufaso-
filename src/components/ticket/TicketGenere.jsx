@@ -1,14 +1,7 @@
 /**
  * Ticket Généré - Version horizontale avec affiche en fond
  * Règles NASA 1-10
- * CORRECTIONS :
- * - QR code plus grand
- * - Textes non coupés (height: auto, line-height, overflow visible)
- * - Toutes les informations visibles
- * - Téléchargement direct via l'URL (paramètre ?download=true)
- * - Détection du téléchargement automatique via WhatsApp
- * - CORRECTION : Import dynamique de html2canvas pour Netlify
- * - CORRECTION : Gestion des erreurs de chargement
+ * SÉCURITÉ : Import dynamique de html2canvas avec fallback
  */
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -42,11 +35,8 @@ const TicketGenere = () => {
   const [imageError, setImageError] = useState(false);
   const [autoDownloadTriggered, setAutoDownloadTriggered] = useState(false);
   const [userRole, setUserRole] = useState(null);
-  const [html2canvasLoaded, setHtml2canvasLoaded] = useState(false);
 
-  const getSiteUrl = () => {
-    return window.location.origin;
-  };
+  const getSiteUrl = () => window.location.origin;
 
   const formatDate = (date) => {
     if (!date) return '';
@@ -87,11 +77,10 @@ const TicketGenere = () => {
   };
 
   // ============================================================
-  // TÉLÉCHARGEMENT AVEC IMPORT DYNAMIQUE DE html2canvas
+  // TÉLÉCHARGEMENT AVEC IMPORT DYNAMIQUE SÉCURISÉ
   // ============================================================
 
   const handleDownload = async (force = false) => {
-    // Si déjà téléchargé et pas de force (admin/organisateur), bloquer
     if (estTelecharge && !force) {
       setError('⚠️ Ce ticket a déjà été téléchargé.');
       setTimeout(() => setError(''), 3000);
@@ -114,40 +103,34 @@ const TicketGenere = () => {
     setError('');
 
     try {
-      // ✅ CORRECTION : Import dynamique de html2canvas avec fallback
+      // ✅ IMPORT DYNAMIQUE SÉCURISÉ avec fallback
       let html2canvas;
       try {
         const module = await import('html2canvas');
         html2canvas = module.default || module;
       } catch (importError) {
-        console.error('Erreur import html2canvas:', importError);
-        setError('❌ Erreur lors du chargement de la bibliothèque de téléchargement.');
+        setError('❌ Erreur de chargement. Veuillez réessayer.');
         setDownloading(false);
         return;
       }
 
       if (!html2canvas || typeof html2canvas !== 'function') {
-        setError('❌ La bibliothèque de téléchargement n\'est pas disponible.');
+        setError('❌ Bibliothèque de téléchargement indisponible.');
         setDownloading(false);
         return;
       }
 
-      // Mettre à jour uniquement si ce n'est pas un admin/organisateur qui force
       if (!force) {
         try {
-          const { error: updateError } = await supabase
+          await supabase
             .from('ventes')
             .update({
               est_telecharger: true,
               date_telechargement: new Date().toISOString()
             })
             .eq('id', id);
-
-          if (updateError) {
-            console.error('Erreur mise à jour:', updateError);
-          }
-        } catch (updateError) {
-          console.error('Erreur mise à jour:', updateError);
+        } catch {
+          // Ignorer les erreurs de mise à jour
         }
         setEstTelecharge(true);
       }
@@ -183,17 +166,12 @@ const TicketGenere = () => {
       setTimeout(() => setSuccess(''), 3000);
 
     } catch (error) {
-      console.error('Erreur téléchargement:', error);
-      setError('❌ Erreur lors du téléchargement: ' + (error.message || 'Veuillez réessayer'));
+      setError('❌ Erreur lors du téléchargement');
       setTimeout(() => setError(''), 3000);
     } finally {
       setDownloading(false);
     }
   };
-
-  // ============================================================
-  // TÉLÉCHARGEMENT AVEC FORCE (POUR ADMIN/ORGANISATEUR PREMIUM)
-  // ============================================================
 
   const handleForceDownload = async () => {
     await handleDownload(true);
@@ -209,7 +187,6 @@ const TicketGenere = () => {
         setLoading(true);
         setError('');
 
-        // 1. Récupérer le ticket
         const { data: vente, error: venteError } = await supabase
           .from('ventes')
           .select('*')
@@ -226,7 +203,6 @@ const TicketGenere = () => {
         setEstTelecharge(vente.est_telecharger || false);
         setEstScanne(vente.est_scanner || false);
 
-        // 2. Récupérer l'événement
         if (vente.evenement_id) {
           const { data: event, error: eventError } = await supabase
             .from('evenements')
@@ -242,7 +218,6 @@ const TicketGenere = () => {
           }
         }
 
-        // 3. Récupérer le type de ticket
         if (vente.type_ticket_id) {
           const { data: type, error: typeError } = await supabase
             .from('types_tickets')
@@ -255,7 +230,6 @@ const TicketGenere = () => {
           }
         }
 
-        // 4. Récupérer le rôle de l'utilisateur connecté
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
           const { data: profile } = await supabase
@@ -269,20 +243,17 @@ const TicketGenere = () => {
           }
         }
 
-        // 5. Vérifier si téléchargement automatique demandé
         const params = new URLSearchParams(location.search);
         const downloadParam = params.get('download');
         
         if (downloadParam === 'true' && !autoDownloadTriggered) {
           setAutoDownloadTriggered(true);
-          // Attendre que le composant soit rendu
           setTimeout(() => {
             handleDownload(true);
           }, 1500);
         }
 
-      } catch (error) {
-        console.error('Erreur:', error);
+      } catch {
         setError('Erreur lors du chargement du ticket');
       } finally {
         setLoading(false);
@@ -307,14 +278,8 @@ const TicketGenere = () => {
   const status = getStatusInfo();
   const qrValue = `${getSiteUrl()}/verify/${id}`;
 
-  // ============================================================
-  // VÉRIFICATION SI L'UTILISATEUR PEUT RETÉLÉCHARGER
-  // ============================================================
-
   const canRedownload = () => {
-    // Admin peut toujours retélécharger
     if (userRole === 'admin') return true;
-    // Organisateur Premium peut retélécharger
     if (userRole === 'organisateur' && organisateur?.plan_id === 'Premium') return true;
     return false;
   };
@@ -372,7 +337,6 @@ const TicketGenere = () => {
     <div className="min-h-screen bg-black py-4 md:py-8 px-4">
       <div className="max-w-4xl mx-auto">
         
-        {/* En-tête */}
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigate(-1)}
@@ -390,7 +354,6 @@ const TicketGenere = () => {
           <div className="w-20" />
         </div>
 
-        {/* Messages */}
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-2 rounded-lg mb-3 flex items-center gap-2 text-sm">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -404,9 +367,6 @@ const TicketGenere = () => {
           </div>
         )}
 
-        {/* ============================================================
-            TICKET HORIZONTAL
-            ============================================================ */}
         <div 
           ref={ticketRef}
           className="relative rounded-xl overflow-hidden shadow-2xl w-full"
@@ -418,7 +378,6 @@ const TicketGenere = () => {
             minHeight: '280px'
           }}
         >
-          {/* FOND : Affiche de l'événement */}
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{ 
@@ -428,13 +387,10 @@ const TicketGenere = () => {
             }}
           />
           
-          {/* Overlay */}
           <div className="absolute inset-0 bg-black/50" />
           
-          {/* Contenu */}
           <div className="relative z-10 p-3 md:p-4 h-full flex flex-col">
             
-            {/* En-tête */}
             <div className="flex items-center justify-between mb-2 flex-wrap gap-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <div 
@@ -458,10 +414,8 @@ const TicketGenere = () => {
               </div>
             </div>
 
-            {/* Corps */}
             <div className="flex flex-1 gap-3 min-h-0">
               
-              {/* Colonne gauche */}
               <div className="w-3/5 flex flex-col bg-black/40 backdrop-blur-sm rounded-xl p-3 border border-white/10">
                 <h2 
                   className="text-white font-bold text-sm md:text-base lg:text-lg ticket-text"
@@ -509,7 +463,6 @@ const TicketGenere = () => {
                   )}
                 </div>
 
-                {/* QR Code */}
                 <div className="mt-auto pt-2 flex items-center justify-between border-t border-white/10">
                   <div className="flex-1 min-w-0">
                     <p className="text-yellow-400 text-[8px] flex items-center gap-1">
@@ -535,7 +488,6 @@ const TicketGenere = () => {
                 </div>
               </div>
 
-              {/* Colonne droite */}
               <div className="w-2/5 flex flex-col gap-2">
                 <div className="flex-1 bg-black/40 backdrop-blur-sm rounded-xl p-2 border border-white/10 flex items-center justify-center min-h-[80px]">
                   {typeTicket?.image_url && !imageError ? (
@@ -553,7 +505,6 @@ const TicketGenere = () => {
                   )}
                 </div>
 
-                {/* Infos acheteur */}
                 <div className="bg-black/40 backdrop-blur-sm rounded-xl p-2 border border-white/10">
                   <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
                     {ticketData?.client_nom && (
@@ -605,7 +556,6 @@ const TicketGenere = () => {
               </div>
             </div>
 
-            {/* Pied de page */}
             <div className="mt-1.5 pt-1 border-t border-white/10 text-center">
               <p className="text-yellow-400 text-[10px] md:text-xs font-medium">
                 FASO TICKET - Billetterie sécurisée
@@ -617,9 +567,7 @@ const TicketGenere = () => {
           </div>
         </div>
 
-        {/* ===== BOUTONS ===== */}
         <div className="mt-4 flex flex-col sm:flex-row gap-2 justify-center">
-          {/* Bouton Télécharger - Client normal */}
           {!canRedownload() && (
             <button
               onClick={handleDownload}
@@ -654,7 +602,6 @@ const TicketGenere = () => {
             </button>
           )}
 
-          {/* Bouton Télécharger - Admin/Organisateur Premium (force) */}
           {canRedownload() && (
             <button
               onClick={handleForceDownload}
