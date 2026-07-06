@@ -1,0 +1,482 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   COULEURS PRINCIPALES - UNIQUEMENT 4 COULEURS
+   ============================================================ */
+
+:root {
+  --yellow: #FFD700;
+  --black: #000000;
+  --white: #FFFFFF;
+  --red: #FF0000;
+}
+
+/* ============================================================
+   STYLES GLOBAUX
+   ============================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--yellow);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #e6c200;
+}
+
+/* ============================================================
+   SELECTION & FOCUS
+   ============================================================ */
+
+::selection {
+  background: var(--yellow);
+  color: var(--black);
+}
+
+*:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================================
+   UTILITAIRES
+   ============================================================ */
+
+.safe-area-inset {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   IMPRESSION
+   ============================================================ */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* ============================================================
+   ============================================================
+   THÈME SOMBRE (DÉFAUT) - FOND NOIR
+   ============================================================
+   ============================================================ */
+
+:root,
+.dark {
+  /* Fond */
+  --bg-primary: #000000;
+  --bg-secondary: #000000;
+  --bg-card: #000000;
+  --bg-card-hover: #1A1A1A;
+  --bg-input: #1A1A1A;
+  --bg-input-hover: #2A2A2A;
+  --bg-dropdown: #1A1A1A;
+  --bg-dropdown-hover: #2A2A2A;
+  --bg-modal: #000000;
+  --bg-table-header: #1A1A1A;
+  --bg-table-row-hover: #1A1A1A;
+  --bg-scrollbar-track: #1A1A1A;
+  
+  /* Textes - UNIQUEMENT BLANC, JAUNE, ROUGE */
+  --text-primary: #FFFFFF;
+  --text-secondary: #FFFFFF;
+  --text-tertiary: #FFFFFF;
+  --text-muted: #FFFFFF;
+  --text-heading: #FFFFFF;
+  --text-body: #FFFFFF;
+  --text-yellow: #FFD700;
+  --text-red: #FF0000;
+  --text-inverse: #000000;
+  
+  /* Bordures */
+  --border-primary: #333333;
+  --border-secondary: #2A2A2A;
+  --border-hover: #444444;
+  --border-yellow: #FFD700;
+  --border-red: #FF0000;
+  
+  /* Ombres */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
+  --shadow-yellow: 0 0 30px rgba(255, 215, 0, 0.1);
+  
+  /* Statuts - UNIQUEMENT ROUGE ET JAUNE */
+  --status-success: #FFD700;
+  --status-success-bg: rgba(255, 215, 0, 0.1);
+  --status-warning: #FFD700;
+  --status-warning-bg: rgba(255, 215, 0, 0.1);
+  --status-error: #FF0000;
+  --status-error-bg: rgba(255, 0, 0, 0.1);
+  --status-info: #FFFFFF;
+  --status-info-bg: rgba(255, 255, 255, 0.05);
+  
+  /* Badges de rôle */
+  --badge-admin: #FF0000;
+  --badge-admin-bg: rgba(255, 0, 0, 0.15);
+  --badge-organisateur: #FFD700;
+  --badge-organisateur-bg: rgba(255, 215, 0, 0.15);
+  --badge-agent: #FFFFFF;
+  --badge-agent-bg: rgba(255, 255, 255, 0.1);
+  --badge-superadmin: #FFD700;
+  --badge-superadmin-bg: rgba(255, 215, 0, 0.2);
+  
+  /* Badges de statut */
+  --badge-active: #FFD700;
+  --badge-active-bg: rgba(255, 215, 0, 0.15);
+  --badge-inactive: #FF0000;
+  --badge-inactive-bg: rgba(255, 0, 0, 0.15);
+  --badge-expired: #FF0000;
+  --badge-expired-bg: rgba(255, 0, 0, 0.15);
+  --badge-pending: #FFD700;
+  --badge-pending-bg: rgba(255, 215, 0, 0.15);
+  --badge-validated: #FFD700;
+  --badge-validated-bg: rgba(255, 215, 0, 0.15);
+  --badge-rejected: #FF0000;
+  --badge-rejected-bg: rgba(255, 0, 0, 0.15);
+  
+  /* Étoiles d'avis */
+  --star-filled: #FFD700;
+  --star-empty: #333333;
+  
+  /* Séparateurs */
+  --divider-color: #333333;
+}
+
+/* ============================================================
+   ============================================================
+   THÈME CLAIR - FOND BLANC
+   ============================================================
+   ============================================================ */
+
+.light {
+  /* Fond */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F5F5F5;
+  --bg-input: #FFFFFF;
+  --bg-input-hover: #F5F5F5;
+  --bg-dropdown: #FFFFFF;
+  --bg-dropdown-hover: #F5F5F5;
+  --bg-modal: #FFFFFF;
+  --bg-table-header: #F5F5F5;
+  --bg-table-row-hover: #F5F5F5;
+  --bg-scrollbar-track: #E5E5E5;
+  
+  /* Textes - UNIQUEMENT NOIR, ROUGE, JAUNE */
+  --text-primary: #000000;
+  --text-secondary: #000000;
+  --text-tertiary: #000000;
+  --text-muted: #000000;
+  --text-heading: #000000;
+  --text-body: #000000;
+  --text-yellow: #B8860B;
+  --text-red: #FF0000;
+  --text-inverse: #FFFFFF;
+  
+  /* Bordures */
+  --border-primary: #CCCCCC;
+  --border-secondary: #DDDDDD;
+  --border-hover: #AAAAAA;
+  --border-yellow: #B8860B;
+  --border-red: #FF0000;
+  
+  /* Ombres */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.12);
+  --shadow-yellow: 0 0 30px rgba(184, 134, 11, 0.15);
+  
+  /* Statuts */
+  --status-success: #B8860B;
+  --status-success-bg: rgba(184, 134, 11, 0.1);
+  --status-warning: #B8860B;
+  --status-warning-bg: rgba(184, 134, 11, 0.1);
+  --status-error: #FF0000;
+  --status-error-bg: rgba(255, 0, 0, 0.1);
+  --status-info: #000000;
+  --status-info-bg: rgba(0, 0, 0, 0.05);
+  
+  /* Badges de rôle */
+  --badge-admin: #FF0000;
+  --badge-admin-bg: rgba(255, 0, 0, 0.12);
+  --badge-organisateur: #B8860B;
+  --badge-organisateur-bg: rgba(184, 134, 11, 0.12);
+  --badge-agent: #000000;
+  --badge-agent-bg: rgba(0, 0, 0, 0.08);
+  --badge-superadmin: #B8860B;
+  --badge-superadmin-bg: rgba(184, 134, 11, 0.15);
+  
+  /* Badges de statut */
+  --badge-active: #B8860B;
+  --badge-active-bg: rgba(184, 134, 11, 0.12);
+  --badge-inactive: #FF0000;
+  --badge-inactive-bg: rgba(255, 0, 0, 0.12);
+  --badge-expired: #FF0000;
+  --badge-expired-bg: rgba(255, 0, 0, 0.12);
+  --badge-pending: #B8860B;
+  --badge-pending-bg: rgba(184, 134, 11, 0.12);
+  --badge-validated: #B8860B;
+  --badge-validated-bg: rgba(184, 134, 11, 0.12);
+  --badge-rejected: #FF0000;
+  --badge-rejected-bg: rgba(255, 0, 0, 0.12);
+  
+  /* Étoiles d'avis */
+  --star-filled: #B8860B;
+  --star-empty: #CCCCCC;
+  
+  /* Séparateurs */
+  --divider-color: #E5E5E5;
+}
+
+/* ============================================================
+   ============================================================
+   CLASSES UTILITAIRES DE THÈME SIMPLIFIÉES
+   ============================================================
+   ============================================================ */
+
+/* === FONDS === */
+.bg-theme-primary { background-color: var(--bg-primary); }
+.bg-theme-card { background-color: var(--bg-card); }
+.bg-theme-input { background-color: var(--bg-input); }
+
+/* === TEXTES === */
+.text-theme-primary { color: var(--text-primary); }
+.text-theme-yellow { color: var(--text-yellow); }
+.text-theme-red { color: var(--text-red); }
+.text-theme-inverse { color: var(--text-inverse); }
+
+/* === BORDURES === */
+.border-theme { border-color: var(--border-primary); }
+.border-theme-yellow { border-color: var(--border-yellow); }
+.border-theme-red { border-color: var(--border-red); }
+
+/* ============================================================
+   ============================================================
+   SURCHARGES TAILWIND - MODE CLAIR
+   ============================================================
+   ============================================================ */
+
+/* Fonds */
+.light .bg-black { background-color: #FFFFFF; }
+.light .bg-black\/80 { background-color: rgba(255, 255, 255, 0.9); }
+.light .bg-black\/50 { background-color: rgba(255, 255, 255, 0.5); }
+.light .bg-gray-900 { background-color: #FFFFFF; }
+.light .bg-gray-800 { background-color: #F5F5F5; }
+.light .bg-gray-700 { background-color: #EEEEEE; }
+.light .bg-gray-900\/50 { background-color: rgba(255, 255, 255, 0.5); }
+.light .bg-gray-900\/30 { background-color: rgba(255, 255, 255, 0.3); }
+.light .bg-gray-900\/10 { background-color: rgba(0, 0, 0, 0.05); }
+.light .bg-gray-900\/20 { background-color: rgba(0, 0, 0, 0.08); }
+
+/* Textes - TOUS EN NOIR SAUF JAUNE ET ROUGE */
+.light .text-white { color: #000000; }
+.light .text-gray-300 { color: #000000; }
+.light .text-gray-400 { color: #000000; }
+.light .text-gray-500 { color: #000000; }
+.light .text-gray-600 { color: #000000; }
+.light .text-gray-700 { color: #000000; }
+.light .text-black { color: #FFFFFF; }
+
+/* Jaune et Rouge restent visibles */
+.light .text-yellow-400 { color: #B8860B; }
+.light .text-yellow-500 { color: #B8860B; }
+.light .text-red-400 { color: #FF0000; }
+.light .text-red-500 { color: #FF0000; }
+.light .text-red-600 { color: #FF0000; }
+
+/* Bordures */
+.light .border-gray-800 { border-color: #CCCCCC; }
+.light .border-gray-700 { border-color: #DDDDDD; }
+.light .border-gray-600 { border-color: #AAAAAA; }
+.light .border-yellow-400 { border-color: #B8860B; }
+.light .border-yellow-400\/20 { border-color: rgba(184, 134, 11, 0.2); }
+.light .border-yellow-400\/10 { border-color: rgba(184, 134, 11, 0.1); }
+.light .border-red-500\/20 { border-color: rgba(255, 0, 0, 0.2); }
+
+/* Survol */
+.light .hover\:bg-gray-800:hover { background-color: #F5F5F5; }
+.light .hover\:bg-gray-700:hover { background-color: #EEEEEE; }
+.light .hover\:bg-gray-900:hover { background-color: #F5F5F5; }
+.light .hover\:bg-gray-800\/50:hover { background-color: rgba(0, 0, 0, 0.05); }
+
+/* Boutons */
+.light .bg-yellow-400 { background-color: #B8860B; color: #FFFFFF; }
+.light .hover\:bg-yellow-300:hover { background-color: #D4A017; }
+.light .bg-gray-800 { background-color: #F5F5F5; color: #000000; }
+.light .hover\:bg-gray-700:hover { background-color: #EEEEEE; }
+.light .bg-red-600 { background-color: #FF0000; color: #FFFFFF; }
+.light .hover\:bg-red-700:hover { background-color: #CC0000; }
+.light .bg-green-600 { background-color: #B8860B; color: #FFFFFF; }
+.light .hover\:bg-green-700:hover { background-color: #D4A017; }
+
+/* Badges de statut */
+.light .bg-green-500\/20 { background-color: rgba(184, 134, 11, 0.12); }
+.light .text-green-400 { color: #B8860B; }
+.light .bg-yellow-500\/20 { background-color: rgba(184, 134, 11, 0.12); }
+.light .text-yellow-400 { color: #B8860B; }
+.light .bg-red-500\/20 { background-color: rgba(255, 0, 0, 0.12); }
+.light .text-red-400 { color: #FF0000; }
+.light .bg-blue-500\/20 { background-color: rgba(0, 0, 0, 0.08); }
+.light .text-blue-400 { color: #000000; }
+.light .bg-orange-500\/20 { background-color: rgba(255, 0, 0, 0.12); }
+.light .text-orange-400 { color: #FF0000; }
+
+/* Étoiles d'avis */
+.light .text-yellow-400 { color: #B8860B; }
+.light .text-gray-600 { color: #CCCCCC; }
+
+/* Ombres */
+.light .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+.light .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+.light .shadow-yellow-400\/25 { box-shadow: 0 0 30px rgba(184, 134, 11, 0.15); }
+.light .shadow-red-600\/25 { box-shadow: 0 0 30px rgba(255, 0, 0, 0.1); }
+
+/* Inputs */
+.light input,
+.light select,
+.light textarea {
+  background-color: #FFFFFF;
+  border-color: #CCCCCC;
+  color: #000000;
+}
+.light input::placeholder,
+.light textarea::placeholder {
+  color: #999999;
+}
+.light input:focus,
+.light select:focus,
+.light textarea:focus {
+  border-color: #B8860B;
+  outline: none;
+}
+.light input:disabled,
+.light select:disabled,
+.light textarea:disabled {
+  background-color: #F5F5F5;
+  color: #999999;
+}
+
+/* Scrollbar mode clair */
+.light ::-webkit-scrollbar-track {
+  background: #E5E5E5;
+}
+.light ::-webkit-scrollbar-thumb {
+  background: #B8860B;
+}
+.light ::-webkit-scrollbar-thumb:hover {
+  background: #D4A017;
+}
+
+/* Séparateurs */
+.light .border-gray-800 { border-color: #E5E5E5; }
+.light .border-t-gray-800 { border-color: #E5E5E5; }
+.light .border-b-gray-800 { border-color: #E5E5E5; }
+
+/* Liens */
+.light .text-yellow-400 { color: #B8860B; }
+.light .hover\:text-yellow-300:hover { color: #D4A017; }
+.light .text-red-400 { color: #FF0000; }
+.light .hover\:text-red-300:hover { color: #CC0000; }
+
+/* Badges */
+.light .bg-yellow-500\/20 { background-color: rgba(184, 134, 11, 0.12); }
+.light .bg-red-500\/20 { background-color: rgba(255, 0, 0, 0.12); }
+.light .bg-blue-500\/20 { background-color: rgba(0, 0, 0, 0.08); }
+.light .bg-green-500\/20 { background-color: rgba(184, 134, 11, 0.12); }
+.light .bg-orange-500\/20 { background-color: rgba(255, 0, 0, 0.12); }
+
+/* ============================================================
+   ============================================================
+   TRANSITIONS DOUCES
+   ============================================================
+   ============================================================ */
+
+* {
+  transition: 
+    background-color 0.25s ease-in-out,
+    color 0.25s ease-in-out,
+    border-color 0.25s ease-in-out,
+    box-shadow 0.25s ease-in-out;
+}
+
+.no-transition,
+.no-transition * {
+  transition: none !important;
+}

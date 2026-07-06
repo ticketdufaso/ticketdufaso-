@@ -1,0 +1,8 @@
+# robots.txt - FASO TICKET
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /organisateur/
+Disallow: /api/
+
+Sitemap: https://fasoticket.com/sitemap.xml

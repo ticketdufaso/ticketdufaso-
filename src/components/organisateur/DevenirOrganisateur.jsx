@@ -1,0 +1,187 @@
+/**
+ * Page Devenir Organisateur
+ * Règles NASA 1-10
+ * Sécurité niveau Google/Windows
+ * Version complète et finale - avec bouton retour
+ * CORRECTIONS :
+ * - Ajout d'un bouton de retour à l'accueil
+ * - Design responsive
+ * - Sélection des plans
+ */
+
+import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Check, Crown, Ticket, Shield, Award, Users, ArrowLeft, Home } from 'lucide-react'
+
+const DevenirOrganisateur = () => {
+  const navigate = useNavigate()
+  const [selectedPlan, setSelectedPlan] = useState(null)
+
+  const plans = [
+    {
+      id: 'basique',
+      nom: 'Basique',
+      prix: 30000,
+      duree: '1 mois',
+      dureeJours: 30,
+      icon: <Ticket className="w-6 h-6" />,
+      color: 'bg-gray-800 text-gray-400',
+      features: [
+        '2 événements maximum',
+        '2 agents maximum',
+        '2 codes promo maximum',
+        'Types de tickets : Simple, VIP',
+        'Visibilité dans la boutique'
+      ],
+      badge: null
+    },
+    {
+      id: 'premium',
+      nom: 'Premium',
+      prix: 50000,
+      duree: '3 mois',
+      dureeJours: 90,
+      icon: <Crown className="w-6 h-6" />,
+      color: 'bg-yellow-400/20 text-yellow-400',
+      features: [
+        '10 événements maximum',
+        '5 agents maximum',
+        '5 codes promo maximum',
+        'Types : Simple, VIP, VVIP, Stand, Salon, Personnalisé',
+        'Visibilité à la une',
+        'Visibilité dans la boutique',
+        'Codes promo illimités',
+        'Statistiques avancées',
+        'Export Excel / PDF',
+        'Messagerie avec l\'administration'
+      ],
+      badge: 'RECOMMANDÉ'
+    }
+  ]
+
+  return (
+    <div className="min-h-screen bg-black py-8 md:py-12 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* ============================================================
+            BOUTON DE RETOUR À L'ACCUEIL
+            ============================================================ */}
+        <div className="flex items-center gap-4 mb-6">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Retour à l'accueil
+          </button>
+          <span className="text-gray-600">|</span>
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition-colors"
+          >
+            <Home className="w-4 h-4" />
+            Accueil
+          </Link>
+        </div>
+
+        <div className="text-center mb-8 md:mb-12">
+          <h1 className="text-2xl md:text-4xl font-bold text-white">
+            Devenir <span className="text-yellow-400">organisateur</span>
+          </h1>
+          <p className="text-gray-400 text-sm md:text-base mt-2 max-w-2xl mx-auto">
+            Choisissez le plan qui correspond à vos besoins et commencez à vendre vos tickets en ligne
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          {plans.map((plan) => (
+            <div
+              key={plan.id}
+              className={`bg-gray-900 rounded-2xl p-6 md:p-8 border-2 transition-all ${
+                selectedPlan === plan.id 
+                  ? 'border-yellow-400 shadow-lg shadow-yellow-400/10' 
+                  : 'border-gray-800 hover:border-gray-700'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${plan.color}`}>
+                    {plan.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-white">{plan.nom}</h3>
+                </div>
+                {plan.badge && (
+                  <span className="bg-yellow-400 text-black text-xs font-bold px-3 py-1 rounded-full">
+                    {plan.badge}
+                  </span>
+                )}
+              </div>
+
+              <div className="mb-4">
+                <span className="text-3xl font-bold text-yellow-400">
+                  {plan.prix.toLocaleString()} FCFA
+                </span>
+                <span className="text-gray-400 text-sm ml-2">/ {plan.duree}</span>
+              </div>
+
+              <ul className="space-y-2 mb-6">
+                {plan.features.map((feature, index) => (
+                  <li key={index} className="flex items-start gap-2 text-gray-300 text-sm">
+                    <Check className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                onClick={() => setSelectedPlan(plan.id)}
+                className={`w-full py-2.5 rounded-lg font-semibold transition-colors ${
+                  selectedPlan === plan.id
+                    ? 'bg-yellow-400 text-black hover:bg-yellow-300'
+                    : 'bg-gray-800 text-white hover:bg-gray-700 border border-gray-700'
+                }`}
+              >
+                {selectedPlan === plan.id ? 'Plan sélectionné' : 'Choisir ce plan'}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {selectedPlan && (
+          <div className="mt-8 md:mt-10 text-center">
+            <Link
+              to={`/paiement-plan/${selectedPlan}`}
+              className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-8 py-3 rounded-xl transition-all transform hover:scale-105"
+            >
+              <Shield className="w-5 h-5" />
+              Continuer vers le paiement
+            </Link>
+            <p className="text-gray-400 text-xs md:text-sm mt-3">
+              Vous serez redirigé vers la page de paiement sécurisé
+            </p>
+          </div>
+        )}
+
+        <div className="mt-12 md:mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="text-center p-4 bg-gray-900/50 rounded-xl border border-gray-800">
+            <Award className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
+            <p className="text-gray-300 text-xs md:text-sm">0% frais cachés</p>
+          </div>
+          <div className="text-center p-4 bg-gray-900/50 rounded-xl border border-gray-800">
+            <Shield className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
+            <p className="text-gray-300 text-xs md:text-sm">100% sécurisé</p>
+          </div>
+          <div className="text-center p-4 bg-gray-900/50 rounded-xl border border-gray-800">
+            <Users className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
+            <p className="text-gray-300 text-xs md:text-sm">Support 24/7</p>
+          </div>
+          <div className="text-center p-4 bg-gray-900/50 rounded-xl border border-gray-800">
+            <Ticket className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
+            <p className="text-gray-300 text-xs md:text-sm">Tickets immédiats</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default DevenirOrganisateur

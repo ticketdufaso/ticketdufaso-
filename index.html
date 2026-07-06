@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="FasoTicket" />
+    
+    <meta name="description" content="FASO TICKET - Billetterie sécurisée pour événements au Burkina Faso. Achetez et réservez vos tickets en ligne." />
+    <meta name="keywords" content="billetterie, événements, Burkina Faso, tickets, réservation, transport" />
+    <meta name="author" content="FASO TICKET" />
+    <meta name="robots" content="index, follow" />
+    
+    <meta property="og:title" content="FASO TICKET - Billetterie sécurisée" />
+    <meta property="og:description" content="La billetterie simple, rapide et sécurisée pour vos événements au Burkina Faso." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://fasoticket.com" />
+    <meta property="og:image" content="/images/og-image.jpg" />
+    
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FASO TICKET - Billetterie sécurisée" />
+    <meta name="twitter:description" content="La billetterie simple, rapide et sécurisée pour vos événements." />
+    
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <title>FASO TICKET - Billetterie sécurisée</title>
+    
+    <style>
+      /* Critical CSS pour éviter le flash */
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { background: #000000; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
+      #root { min-height: 100vh; }
+      
+      /* Animation pour la bannière */
+      @keyframes slideUp {
+        from { transform: translateY(100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      .animate-slide-up {
+        animation: slideUp 0.4s ease-out forwards;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
