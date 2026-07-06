@@ -31,23 +31,16 @@
     <title>FASO TICKET - Billetterie sécurisée</title>
     
     <style>
-      /* Critical CSS pour éviter le flash */
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { background: #000000; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
       #root { min-height: 100vh; }
-      
-      /* Animation pour la bannière */
-      @keyframes slideUp {
-        from { transform: translateY(100%); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-      }
-      .animate-slide-up {
-        animation: slideUp 0.4s ease-out forwards;
-      }
     </style>
   </head>
   <body>
     <div id="root"></div>
+    
+    <!-- ❌ PAS d'importmap, PAS de CDN -->
+    <!-- ✅ React est inclus dans le bundle par Vite -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

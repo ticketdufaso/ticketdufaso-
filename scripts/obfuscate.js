@@ -1,7 +1,11 @@
 /**
  * Script d'obfuscation - Niveau NASA
  * Règles NASA 1, 4, 5, 6
- * CORRECTION : Exclure html2canvas et ses dépendances de l'obfuscation
+ * CORRECTIONS :
+ * - Exclure les fichiers contenant du code React (détection par contenu)
+ * - Exclure les bibliothèques tierces par nom
+ * - Exclure Goober (CSS-in-JS) qui cause des conflits avec React
+ * - Vérification du contenu avant obfuscation
  */
 
 import JavaScriptObfuscator from 'javascript-obfuscator'
@@ -47,7 +51,7 @@ const OBFUSCATION_CONFIG = {
   unicodeEscapeSequence: false
 }
 
-// ✅ EXCLURE html2canvas et ses dépendances de l'obfuscation
+// ✅ Exclure par nom de fichier (patterns)
 const EXCLUDED_PATTERNS = [
   'vendor',
   'polyfill',
@@ -55,7 +59,41 @@ const EXCLUDED_PATTERNS = [
   'runtime',
   'html2canvas',
   'jspdf',
-  'canvas'  // Le chunk canvas qu'on a créé dans vite.config.js
+  'canvas',
+  'react',
+  'react-dom',
+  'react-router-dom',
+  'scheduler',
+  'workbox',
+  'goober'  // ✅ AJOUT : Goober (CSS-in-JS utilisé par Lucide)
+]
+
+// ✅ Exclure par contenu (si le fichier contient ces mots-clés, on ne l'obfusque pas)
+const EXCLUDED_CONTENT_MARKERS = [
+  'ReactCurrentOwner',
+  'react',
+  'React',
+  'createElement',
+  'createContext',
+  'useState',
+  'useEffect',
+  'useRef',
+  'useCallback',
+  'useMemo',
+  'useReducer',
+  'useContext',
+  'useLayoutEffect',
+  'useImperativeHandle',
+  'useDebugValue',
+  'useDeferredValue',
+  'useTransition',
+  'useId',
+  'createRoot',
+  'render',
+  'hydrateRoot',
+  'goober',  // ✅ AJOUT : Détecter Goober dans le contenu
+  'css',     // Goober utilise la fonction css
+  'styled'   // Goober utilise styled
 ]
 
 const ALLOWED_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs']
@@ -71,14 +109,31 @@ let stats = {
 // FONCTIONS
 // ============================================================
 
+const isObfuscated = (content) => {
+  const markers = ['selfDefending', 'decodeURIComponent', 'var _0x', 'function _0x']
+  return markers.some(marker => content.includes(marker))
+}
+
+const shouldExcludeByContent = (content) => {
+  // Si le fichier contient des marqueurs React ou Goober, on l'exclut
+  const hasReactMarker = EXCLUDED_CONTENT_MARKERS.some(marker => 
+    content.includes(marker)
+  )
+  
+  // Si le fichier est déjà obfusqué, on l'exclut
+  const isAlreadyObfuscated = isObfuscated(content)
+  
+  return hasReactMarker || isAlreadyObfuscated
+}
+
 const obfuscateFile = (filePath) => {
   try {
     const content = fs.readFileSync(filePath, 'utf8')
     
-    // Ne pas obfusquer si le fichier est déjà obfusqué
-    if (content.includes('selfDefending') || content.includes('_0x')) {
+    // ✅ Vérifier si le fichier contient du code React ou Goober
+    if (shouldExcludeByContent(content)) {
       stats.skipped++
-      console.log(`⏭️  Déjà obfusqué: ${path.basename(filePath)}`)
+      console.log(`⏭️  Exclus (contient React/Goober ou déjà obfusqué): ${path.basename(filePath)}`)
       return
     }
     
@@ -110,13 +165,15 @@ const obfuscateDirectory = (directory) => {
     } else {
       const ext = path.extname(file)
       const isAllowed = ALLOWED_EXTENSIONS.includes(ext)
-      const isExcluded = EXCLUDED_PATTERNS.some(p => file.includes(p))
+      const isExcludedByName = EXCLUDED_PATTERNS.some(p => 
+        file.toLowerCase().includes(p.toLowerCase())
+      )
       
-      if (isAllowed && !isExcluded) {
+      if (isAllowed && !isExcludedByName) {
         obfuscateFile(fullPath)
-      } else if (isExcluded) {
+      } else if (isExcludedByName) {
         stats.skipped++
-        console.log(`⏭️  Exclus: ${path.basename(file)}`)
+        console.log(`⏭️  Exclus par nom: ${path.basename(file)}`)
       }
     }
   }
@@ -130,7 +187,8 @@ const main = () => {
   console.log('🚀 Démarrage de l\'obfuscation...')
   console.log('📋 Configuration:')
   console.log(`   - Extensions: ${ALLOWED_EXTENSIONS.join(', ')}`)
-  console.log(`   - Exclus: ${EXCLUDED_PATTERNS.join(', ')}`)
+  console.log(`   - Exclus par nom: ${EXCLUDED_PATTERNS.join(', ')}`)
+  console.log(`   - Exclus par contenu: React, Goober, hooks, etc.`)
   console.log('')
   
   const distDir = path.join(__dirname, '../dist/assets')
@@ -151,7 +209,6 @@ const main = () => {
   console.log('🎯 Obfuscation terminée !')
 }
 
-// Vérifier qu'on est en production
 console.assert(
   process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'secure',
   'L\'obfuscation ne doit être utilisée qu\'en production'
